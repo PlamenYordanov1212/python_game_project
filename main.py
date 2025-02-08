@@ -7,7 +7,7 @@ import pygame
 
 
 class CharacterOne(pygame.sprite.Sprite):
-    """Class which represents the player character in the first phase"""
+    """Class which represents the player character in the first phase."""
 
 
     def __init__(self) -> None:
@@ -45,7 +45,11 @@ class CharacterOne(pygame.sprite.Sprite):
             self, sheet: pygame.Surface, frame_count: int,
             dimensions: tuple[int, int], scale: int|float
         ) -> pygame.Surface:
-        """Function to get desired frame from a sprite sheet"""
+        """
+        Function to get desired frame from a sprite sheet.
+        It creates a surface then draws the frame onto it 
+        and finally scaling the surface before returning it.
+        """
         frame = pygame.Surface(dimensions).convert_alpha()
         frame.blit(sheet, (0, 0), ((frame_count * dimensions[0]), 0, dimensions[0], dimensions[1]))
         frame = pygame.transform.scale(frame, (dimensions[0] * scale, dimensions[1] * scale))
@@ -74,7 +78,7 @@ class CharacterOne(pygame.sprite.Sprite):
 
 
     def apply_gravity(self) -> None:
-        """Function which moves the player character depending on what is pressed"""
+        """Function which moves the player character depending on what is pressed."""
         self.coords_change[1] += 1
         self.rect.y += int(self.coords_change[1])
 
@@ -83,7 +87,7 @@ class CharacterOne(pygame.sprite.Sprite):
         self.rect.x += int(self.coords_change[0])
 
     def animation(self) -> None:
-        """Function which animates the character sprite depending on player input"""
+        """Function which animates the character sprite depending on player input."""
         if self.clicked:
             self.attack_frame_index += 0.2
             if self.attack_frame_index >= len(self.frames["attack_frames"]):
@@ -102,17 +106,17 @@ class CharacterOne(pygame.sprite.Sprite):
             self.image = self.frames["run_frames"][int(self.frame_index)]
 
     def reset(self) -> None:
-        """Function which returns player character at the starting position upon restart"""
+        """Function which returns player character at the starting position upon restart."""
         self.rect.midbottom = (self.start_coords[0], self.start_coords[1])
 
     def update(self) -> None:
-        """Function to update the player character for each frame of the game"""
+        """Function to update the player character for each frame of the game."""
         self.input()
         self.apply_gravity()
         self.animation()
 
 class Orb(pygame.sprite.Sprite):
-    """Class which represents the orbs in both phases"""
+    """Class which represents the orbs in both phases."""
 
 
     def __init__(self, rand_x_coord: tuple[int, int], rand_y_coord: tuple[int, int]) -> None:
@@ -122,17 +126,17 @@ class Orb(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft = (randint(*rand_x_coord), randint(*rand_y_coord)))
 
     def disappear(self) -> None:
-        """Functions which removes an orb once it leaves the screen"""
+        """Functions which removes an orb once it leaves the screen."""
         if self.rect.x <= -100:
             self.kill()
 
     def update(self, speed: int) -> None:
-        """Function which updates the orb for each frame of the game"""
+        """Function which updates the orb location for each frame of the game."""
         self.rect.x -= speed
         self.disappear()
 
 class FireBall(pygame.sprite.Sprite):
-    """Class which represents the fireballs in the second phase of the game"""
+    """Class which represents the fireballs in the second phase of the game."""
 
 
     def __init__(self) -> None:
@@ -150,7 +154,11 @@ class FireBall(pygame.sprite.Sprite):
             self, sheet: pygame.Surface, frame_count: int,
             dimensions: tuple[int, int], scale: int|float
         ) -> pygame.Surface:
-        """Function to get desired frame from a sprite sheet"""
+        """
+        Function to get desired frame from a sprite sheet.
+        It creates a surface then draws the frame onto it 
+        and finally scaling the surface before returning it.
+        """
         frame = pygame.Surface(dimensions).convert_alpha()
         frame.blit(sheet, (0, 0), ((frame_count * dimensions[0]), 0, dimensions[0], dimensions[1]))
         frame = pygame.transform.scale(frame, (dimensions[0] * scale, dimensions[1] * scale))
@@ -159,25 +167,25 @@ class FireBall(pygame.sprite.Sprite):
         return frame
 
     def disappear(self) -> None:
-        """Functions which removes a fireball once it leaves the screen"""
+        """Functions which removes a fireball once it leaves the screen."""
         if self.rect.x <= -100:
             self.kill()
 
     def animation(self) -> None:
-        """Function which animates the fireball"""
+        """Function which animates the fireball by going trough the list of frames."""
         self.frame_index += 0.05
         if self.frame_index >= len(self.frames):
             self.frame_index = 0
         self.image = self.frames[int(self.frame_index)]
 
     def update(self) -> None:
-        """Function which updates the fireball for each frame of the game"""
+        """Function which updates the fireball for each frame of the game."""
         self.rect.x -= 25
         self.animation()
         self.disappear()
 
 class CharacterTwo(pygame.sprite.Sprite):
-    """Class which represents the player character in the second phase"""
+    """Class which represents the player character in the second phase."""
 
 
     def __init__(self) -> None:
@@ -211,7 +219,11 @@ class CharacterTwo(pygame.sprite.Sprite):
             self, sheet: pygame.Surface, frame_count: int,
             dimensions: tuple[int, int], scale: int|float
         ) -> pygame.Surface:
-        """Function to get desired frame from a sprite sheet"""
+        """
+        Function to get desired frame from a sprite sheet.
+        It creates a surface then draws the frame onto it 
+        and finally scaling the surface before returning it.
+        """
         frame = pygame.Surface(dimensions).convert_alpha()
         frame.blit(sheet, (0, 0), ((frame_count * dimensions[0]), 0, dimensions[0], dimensions[1]))
         frame = pygame.transform.scale(frame, (dimensions[0] * scale, dimensions[1] * scale))
@@ -220,7 +232,7 @@ class CharacterTwo(pygame.sprite.Sprite):
         return frame
 
     def input(self) -> None:
-        """Function which tracks player input"""
+        """Function which tracks player input."""
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_w]:
@@ -240,7 +252,10 @@ class CharacterTwo(pygame.sprite.Sprite):
             self.coords_change[1] = 0
 
     def apply_movement(self) -> None:
-        """Function which moves the player character depending on what was pressed"""
+        """
+        Function which moves the player character depending on what was pressed
+        and sets boundaries on the screen so the player character cannot leave it.
+        """
         if self.rect.left < 0:
             self.rect.left = 0
         elif self.rect.right > 1280:
@@ -255,7 +270,10 @@ class CharacterTwo(pygame.sprite.Sprite):
         self.rect.y += int(self.coords_change[1])
 
     def animation(self) -> None:
-        """Function which animates the character sprite depending on player input"""
+        """
+        Function which animates the character sprite depending on player input 
+        by going trough the respective list of frames.
+        """
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_w]:
@@ -275,17 +293,17 @@ class CharacterTwo(pygame.sprite.Sprite):
             self.image = self.frames["fly_n_frames"][int(self.frame_index)]
 
     def reset(self) -> None:
-        """Function which returns player character at the starting position upon restart"""
+        """Function which returns player character at the starting position upon restart."""
         self.rect.midbottom = (self.start_coords[0], self.start_coords[1])
 
     def update(self) -> None:
-        """Function to update the player character for each frame of the game"""
+        """Function to update the player character for each frame of the game."""
         self.input()
         self.apply_movement()
         self.animation()
 
 class GroupsAndCollison():
-    """Class for sprite groups and collisions between them"""
+    """Class for sprite groups and collisions between them."""
     def __init__(self) -> None:
         self.char1 = CharacterOne()
         self.char1_group: pygame.sprite.GroupSingle = pygame.sprite.GroupSingle()
@@ -300,20 +318,26 @@ class GroupsAndCollison():
         self.fireball_group: pygame.sprite.Group = pygame.sprite.Group()
 
     def collision_char1_orb(self) -> list[pygame.sprite.Sprite]:
-        """Function to check collision between player character and orbs in the first phase"""
+        """
+        Function to check for collisions between player character and orbs in the first phase.
+        """
         return pygame.sprite.spritecollide(self.char1_group.sprite, self.orb_group, True)
 
     def collision_char2_orb(self) -> list[pygame.sprite.Sprite]:
-        """Function to check collision between player character and orbs in the second phase"""
+        """
+        Function to check for collisions between player character and orbs in the second phase.
+        """
         return pygame.sprite.spritecollide(self.char2_group.sprite, self.orb_group, True)
 
     def collision_char2_fireball(self) -> list[pygame.sprite.Sprite]:
-        """Function to check collision between player character and fireballs in the second phase"""
+        """
+        Function to check for collisions between player character and fireballs in the second phase.
+        """
         return pygame.sprite.spritecollide(self.char2_group.sprite, self.fireball_group, True)
 
 
 class GameLoop():
-    """Class which combines all game elements and starts the game"""
+    """Class which combines all game elements and starts the game."""
     def __init__(self) -> None:
         pygame.init()
 
@@ -364,7 +388,7 @@ class GameLoop():
 
 
     def display_time(self, color) -> int:
-        """Function which takes track of time and displays it"""
+        """Function which tracks the elapsed time and displays it."""
         current_time = (pygame.time.get_ticks() - self.start_time) // 1000
         font = pygame.font.Font(None, 50)
 
@@ -380,7 +404,7 @@ class GameLoop():
         return current_time
 
     def draw_energy_bar(self, color) -> None:
-        """Function which draws the energy bar on the screen"""
+        """Function which draws the energy bar on the screen for each frame of the game."""
         font = pygame.font.Font(None, 50)
         text_surface = font.render("Energy", False, color)
         text_rect = text_surface.get_rect(center = (640, 50))
@@ -390,7 +414,11 @@ class GameLoop():
         pygame.draw.rect(self.screen, color, pygame.Rect(400, 70, 500, 70), 6)
 
     def bar_progress(self) -> None:
-        """Function which checks the energy bar's state and changes game phases accordingly"""
+        """
+        Function which reduces the energy bar each frame,
+        checks the energy bar's state and changes game phases accordingly
+        and keeps track of the best time for completion of the game using a file.
+        """
         self.bar_length -= 0.25
 
         if self.bar_length <= 0:
@@ -420,7 +448,7 @@ class GameLoop():
             self.phases["victory"] = True
 
     def draw_victory_screen(self) -> None:
-        """Function which draws the victory screen upon successful completion of the game"""
+        """Function which draws the victory screen upon successful completion of the game."""
         self.screen.fill("Black")
         victory_font = pygame.font.Font(None, 150)
         victory_text_surf = victory_font.render("Congratulations!", False, "White")
@@ -540,7 +568,7 @@ class GameLoop():
             self.draw_retry_button()
 
     def run(self) -> None:
-        """Function which starts the game loop"""
+        """Function which starts the game loop and checks for events"""
         self.sounds["bg_music2"].play(loops = -1)
 
         while True:

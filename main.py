@@ -41,7 +41,10 @@ class CharacterOne(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midbottom = (self.start_coords[0], self.start_coords[1]))
 
 
-    def __get_frame(self, sheet: pygame.Surface, frame_count: int, dimensions: tuple[int, int], scale: int|float) -> pygame.Surface:
+    def __get_frame(
+            self, sheet: pygame.Surface, frame_count: int,
+            dimensions: tuple[int, int], scale: int|float
+        ) -> pygame.Surface:
         """Function to get desired frame from a sprite sheet"""
         frame = pygame.Surface(dimensions).convert_alpha()
         frame.blit(sheet, (0, 0), ((frame_count * dimensions[0]), 0, dimensions[0], dimensions[1]))
@@ -112,11 +115,11 @@ class Orb(pygame.sprite.Sprite):
     """Class which represents the orbs in both phases"""
 
 
-    def __init__(self) -> None:
+    def __init__(self, rand_x_coord: tuple[int, int], rand_y_coord: tuple[int, int]) -> None:
         super().__init__()
 
         self.image = pygame.image.load("gfx/orb.png").convert_alpha()
-        self.rect = self.image.get_rect(topleft = (randint(1300, 1500), randint(250, 475)))
+        self.rect = self.image.get_rect(topleft = (randint(*rand_x_coord), randint(*rand_y_coord)))
 
     def disappear(self) -> None:
         """Functions which removes an orb once it leaves the screen"""
@@ -141,9 +144,12 @@ class FireBall(pygame.sprite.Sprite):
         self.frame_index = 0.0
 
         self.image = self.frames[int(self.frame_index)]
-        self.rect = self.image.get_rect(topleft = (randint(1300, 1500), randint(250, 600)))
+        self.rect = self.image.get_rect(topleft = (randint(1500, 1700), randint(250, 600)))
 
-    def __get_frame(self, sheet: pygame.Surface, frame_count: int, dimensions: tuple[int, int], scale: int|float) -> pygame.Surface:
+    def __get_frame(
+            self, sheet: pygame.Surface, frame_count: int,
+            dimensions: tuple[int, int], scale: int|float
+        ) -> pygame.Surface:
         """Function to get desired frame from a sprite sheet"""
         frame = pygame.Surface(dimensions).convert_alpha()
         frame.blit(sheet, (0, 0), ((frame_count * dimensions[0]), 0, dimensions[0], dimensions[1]))
@@ -201,7 +207,10 @@ class CharacterTwo(pygame.sprite.Sprite):
         self.image = self.frames["fly_n_frames"][int(self.frame_index)]
         self.rect = self.image.get_rect(midbottom = (self.start_coords[0], self.start_coords[1]))
 
-    def __get_frame(self, sheet: pygame.Surface, frame_count: int, dimensions: tuple[int, int], scale: int|float) -> pygame.Surface:
+    def __get_frame(
+            self, sheet: pygame.Surface, frame_count: int,
+            dimensions: tuple[int, int], scale: int|float
+        ) -> pygame.Surface:
         """Function to get desired frame from a sprite sheet"""
         frame = pygame.Surface(dimensions).convert_alpha()
         frame.blit(sheet, (0, 0), ((frame_count * dimensions[0]), 0, dimensions[0], dimensions[1]))
@@ -290,15 +299,15 @@ class GroupsAndCollison():
 
         self.fireball_group: pygame.sprite.Group = pygame.sprite.Group()
 
-    def collision_char1_orb(self) -> list[bool]:
+    def collision_char1_orb(self) -> list[pygame.sprite.Sprite]:
         """Function to check collision between player character and orbs in the first phase"""
         return pygame.sprite.spritecollide(self.char1_group.sprite, self.orb_group, True)
 
-    def collision_char2_orb(self) -> list[bool]:
+    def collision_char2_orb(self) -> list[pygame.sprite.Sprite]:
         """Function to check collision between player character and orbs in the second phase"""
         return pygame.sprite.spritecollide(self.char2_group.sprite, self.orb_group, True)
 
-    def collision_char2_fireball(self) -> list[bool]:
+    def collision_char2_fireball(self) -> list[pygame.sprite.Sprite]:
         """Function to check collision between player character and fireballs in the second phase"""
         return pygame.sprite.spritecollide(self.char2_group.sprite, self.fireball_group, True)
 
@@ -342,7 +351,7 @@ class GameLoop():
         pygame.time.set_timer(self.orb_timer, 1000)
 
         self.fireball_timer = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.fireball_timer, 1600)
+        pygame.time.set_timer(self.fireball_timer, 1400)
 
         self.phases = {"first_phase_active": True,
                        "second_phase_active": False,
@@ -382,7 +391,7 @@ class GameLoop():
 
     def bar_progress(self) -> None:
         """Function which checks the energy bar's state and changes game phases accordingly"""
-        self.bar_length -= 0.2
+        self.bar_length -= 0.25
 
         if self.bar_length <= 0:
             self.final_time = self.display_time("White")
@@ -516,10 +525,10 @@ class GameLoop():
 
             if self.groups.collision_char2_orb():
                 self.sounds["orb_break_sound"].play()
-                self.bar_length += 50
+                self.bar_length += 30
 
             if self.groups.collision_char2_fireball():
-                self.bar_length -= 15
+                self.bar_length -= 20
                 self.sounds["fireball_hit_sound"].play()
 
             self.display_time("White")
@@ -544,12 +553,12 @@ class GameLoop():
                         self.sounds["attack_sound"].play()
                         if self.groups.collision_char1_orb():
                             self.sounds["orb_break_sound"].play()
-                            self.bar_length += 80
+                            self.bar_length += 30
                     if event.type == self.orb_timer:
-                        self.groups.orb_group.add(Orb())
+                        self.groups.orb_group.add(Orb((1300, 1500), (250, 475)))
                 if self.phases["second_phase_active"]:
                     if event.type == self.orb_timer:
-                        self.groups.orb_group.add(Orb())
+                        self.groups.orb_group.add(Orb((1500, 1700), (200, 600)))
                     if event.type == self.fireball_timer:
                         self.groups.fireball_group.add(FireBall())
 

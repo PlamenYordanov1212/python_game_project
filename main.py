@@ -1,3 +1,4 @@
+"""Main"""
 import sys
 from random import randint
 import math
@@ -6,34 +7,42 @@ import pygame
 
 
 class CharacterOne(pygame.sprite.Sprite):
+    """Class which represents the player character in the first phase"""
+
 
     def __init__(self):
         super().__init__()
 
-        self.run_sheet = pygame.image.load("graphics/character_phase_one/run.png").convert_alpha()
-        self.jump_sheet = pygame.image.load("graphics/character_phase_one/jump.png").convert_alpha()
-        self.attack_sheet = pygame.image.load("graphics/character_phase_one/attack.png").convert_alpha()
+        self.sheets = {
+            "run_sheet": pygame.image.load("gfx/char_phase_one/run.png").convert_alpha(),
+            "jump_sheet": pygame.image.load("gfx/char_phase_one/jump.png").convert_alpha(),
+            "attack_sheet": pygame.image.load("gfx/char_phase_one/attack.png").convert_alpha()
+        }
 
-        self.run_frames = [self.__get_frame(self.run_sheet, i, (42, 42), 4) for i in range(6)]
-        self.jump_frames = [self.__get_frame(self.jump_sheet, i, (42, 42), 4) for i in range(8)]
-        self.attack_frames = [self.__get_frame(self.attack_sheet, i, (42, 42), 4) for i in range(6)]
+        self.frames = {
+            "run_frames": 
+                [self.__get_frame(self.sheets["run_sheet"], i, (42, 42), 4) for i in range(6)],
+            "jump_frames": 
+                [self.__get_frame(self.sheets["jump_sheet"], i, (42, 42), 4) for i in range(8)],
+            "attack_frames": 
+                [self.__get_frame(self.sheets["attack_sheet"], i, (42, 42), 4) for i in range(6)]
+        }
 
         self.frame_index = 0
         self.attack_frame_index = 0
 
-        self.gravity = 0
-        self.x_change = 0
+        self.coords_change = [0, 0]
 
         self.clicked = False
 
-        self.start_x = 90
-        self.start_y = 605
+        self.start_coords = (90, 605)
 
-        self.image = self.run_frames[self.frame_index]
-        self.rect = self.image.get_rect(midbottom = (self.start_x, self.start_y))
+        self.image = self.frames["run_frames"][self.frame_index]
+        self.rect = self.image.get_rect(midbottom = (self.start_coords[0], self.start_coords[1]))
 
 
     def __get_frame(self, sheet, frame_count, dimensions, scale):
+        """Function to get desired frame from a sprite sheet"""
         frame = pygame.Surface(dimensions).convert_alpha()
         frame.blit(sheet, (0, 0), ((frame_count * dimensions[0]), 0, dimensions[0], dimensions[1]))
         frame = pygame.transform.scale(frame, (dimensions[0] * scale, dimensions[1] * scale))
@@ -42,79 +51,91 @@ class CharacterOne(pygame.sprite.Sprite):
         return frame
 
     def input(self):
+        """Function which tracks player input"""
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed()
         if keys[pygame.K_SPACE] and self.rect.bottom >= 605:
-            self.gravity = -25
+            self.coords_change[1] = -25
 
         if keys[pygame.K_d]:
-            self.x_change += 0.25
+            self.coords_change[0] += 0.25
 
         if keys[pygame.K_a]:
-            self.x_change -= 0.25
+            self.coords_change[0] -= 0.25
 
         if not any(keys):
-            self.x_change = 0
+            self.coords_change[0] = 0
 
         if mouse[0]:
             self.clicked = True
 
 
     def apply_gravity(self):
-        self.gravity += 1
-        self.rect.y += self.gravity
+        """Function which moves the player character depending on what is pressed"""
+        self.coords_change[1] += 1
+        self.rect.y += self.coords_change[1]
 
         self.rect.bottom = min(self.rect.bottom, 605)
 
-        self.rect.x += self.x_change
+        self.rect.x += self.coords_change[0]
 
     def animation(self):
-
+        """Function which animates the character sprite depending on player input"""
         if self.clicked:
             self.attack_frame_index += 0.2
-            if self.attack_frame_index >= len(self.attack_frames):
+            if self.attack_frame_index >= len(self.frames["attack_frames"]):
                 self.attack_frame_index = 0
                 self.clicked = False
-            self.image = self.attack_frames[int(self.attack_frame_index)]
+            self.image = self.frames["attack_frames"][int(self.attack_frame_index)]
         elif self.rect.bottom < 605:
             self.frame_index += 0.1
-            if self.frame_index >= len(self.jump_frames):
+            if self.frame_index >= len(self.frames["jump_frames"]):
                 self.frame_index = 0
-            self.image = self.jump_frames[int(self.frame_index)]
+            self.image = self.frames["jump_frames"][int(self.frame_index)]
         else:
             self.frame_index += 0.3
-            if self.frame_index >= len(self.run_frames):
+            if self.frame_index >= len(self.frames["run_frames"]):
                 self.frame_index = 0
-            self.image = self.run_frames[int(self.frame_index)]
+            self.image = self.frames["run_frames"][int(self.frame_index)]
 
     def reset(self):
-        self.rect.midbottom = (self.start_x, self.start_y)
+        """Function which returns player character at the starting position upon restart"""
+        self.rect.midbottom = (self.start_coords[0], self.start_coords[1])
 
     def update(self):
+        """Function to update the player character for each frame of the game"""
         self.input()
         self.apply_gravity()
         self.animation()
 
 class Orb(pygame.sprite.Sprite):
+    """Class which represents the orbs in both phases"""
+
+
     def __init__(self):
         super().__init__()
 
-        self.image = pygame.image.load("graphics/orb.png").convert_alpha()
+        self.image = pygame.image.load("gfx/orb.png").convert_alpha()
         self.rect = self.image.get_rect(topleft = (randint(1300, 1500), randint(250, 475)))
 
     def remove(self):
+        """Functions which removes an orb once it leaves the screen"""
         if self.rect.x <= -100:
             self.kill()
 
     def update(self, speed):
+        """Function which updates the orb for each frame of the game"""
         self.rect.x -= speed
         self.remove()
 
 class FireBall(pygame.sprite.Sprite):
+    """Class which represents the fireballs in the second phase of the game"""
+
+
     def __init__(self):
         super().__init__()
 
-        self.sheet = pygame.image.load("graphics/fireball.png").convert_alpha()
+        self.sheet = pygame.image.load("gfx/fireball.png").convert_alpha()
         self.frames = [self.__get_frame(self.sheet, i, (63, 43), 4) for i in range(8)]
 
         self.frame_index = 0
@@ -123,6 +144,7 @@ class FireBall(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft = (randint(1300, 1500), randint(250, 600)))
 
     def __get_frame(self, sheet, frame_count, dimensions, scale):
+        """Function to get desired frame from a sprite sheet"""
         frame = pygame.Surface(dimensions).convert_alpha()
         frame.blit(sheet, (0, 0), ((frame_count * dimensions[0]), 0, dimensions[0], dimensions[1]))
         frame = pygame.transform.scale(frame, (dimensions[0] * scale, dimensions[1] * scale))
@@ -131,34 +153,43 @@ class FireBall(pygame.sprite.Sprite):
         return frame
 
     def remove(self):
+        """Functions which removes a fireball once it leaves the screen"""
         if self.rect.x <= -100:
             self.kill()
 
     def animation(self):
+        """Function which animates the fireball"""
         self.frame_index += 0.05
         if self.frame_index >= len(self.frames):
             self.frame_index = 0
         self.image = self.frames[int(self.frame_index)]
 
     def update(self):
+        """Function which updates the fireball for each frame of the game"""
         self.rect.x -= 25
         self.animation()
         self.remove()
 
 class CharacterTwo(pygame.sprite.Sprite):
+    """Class which represents the player character in the second phase"""
+
+
     def __init__(self):
         super().__init__()
 
         self.sheets = {
-            "fly_n_sheet": pygame.image.load("graphics/char_phase_two/fly_n.png").convert_alpha(),
-            "fly_up_sheet": pygame.image.load("graphics/char_phase_two/fly_up.png").convert_alpha(),
-            "fly_down_sheet": pygame.image.load("graphics/char_phase_two/fly_down.png").convert_alpha()
+            "fly_n_sheet": pygame.image.load("gfx/char_phase_two/fly_n.png").convert_alpha(),
+            "fly_up_sheet": pygame.image.load("gfx/char_phase_two/fly_up.png").convert_alpha(),
+            "fly_down_sheet": pygame.image.load("gfx/char_phase_two/fly_down.png").convert_alpha()
         }
 
         self.frames = {
-            "fly_n_frames": [self.__get_frame(self.sheets["fly_n_sheet"], i, (52, 28), 3.5) for i in range(3)],
-            "fly_up_frames": [self.__get_frame(self.sheets["fly_up_sheet"], i, (48, 28), 3.5) for i in range(4)],
-            "fly_down_frames": [self.__get_frame(self.sheets["fly_down_sheet"], i, (51, 28), 3.5) for i in range(4)]
+            "fly_n_frames": 
+                [self.__get_frame(self.sheets["fly_n_sheet"], i, (52, 28), 3.5) for i in range(3)],
+            "fly_up_frames": 
+                [self.__get_frame(self.sheets["fly_up_sheet"], i, (48, 28), 3.5) for i in range(4)],
+            "fly_down_frames": 
+               [self.__get_frame(self.sheets["fly_down_sheet"], i, (51, 28), 3.5) for i in range(4)]
         }
 
         self.frame_index = 0
@@ -171,6 +202,7 @@ class CharacterTwo(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midbottom = (self.start_coords[0], self.start_coords[1]))
 
     def __get_frame(self, sheet, frame_count, dimensions, scale):
+        """Function to get desired frame from a sprite sheet"""
         frame = pygame.Surface(dimensions).convert_alpha()
         frame.blit(sheet, (0, 0), ((frame_count * dimensions[0]), 0, dimensions[0], dimensions[1]))
         frame = pygame.transform.scale(frame, (dimensions[0] * scale, dimensions[1] * scale))
@@ -179,6 +211,7 @@ class CharacterTwo(pygame.sprite.Sprite):
         return frame
 
     def input(self):
+        """Function which tracks player input"""
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_w]:
@@ -198,6 +231,7 @@ class CharacterTwo(pygame.sprite.Sprite):
             self.coords_change[1] = 0
 
     def apply_movement(self):
+        """Function which moves the player character depending on what was pressed"""
         if self.rect.left < 0:
             self.rect.left = 0
         elif self.rect.right > 1280:
@@ -212,6 +246,7 @@ class CharacterTwo(pygame.sprite.Sprite):
         self.rect.y += self.coords_change[1]
 
     def animation(self):
+        """Function which animates the character sprite depending on player input"""
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_w]:
@@ -231,14 +266,17 @@ class CharacterTwo(pygame.sprite.Sprite):
             self.image = self.frames["fly_n_frames"][int(self.frame_index)]
 
     def reset(self):
+        """Function which returns player character at the starting position upon restart"""
         self.rect.midbottom = (self.start_coords[0], self.start_coords[1])
 
     def update(self):
+        """Function to update the player character for each frame of the game"""
         self.input()
         self.apply_movement()
         self.animation()
 
 class GroupsAndCollison():
+    """Class for sprite groups and collisions between them"""
     def __init__(self):
         self.char1 = CharacterOne()
         self.char1_group = pygame.sprite.GroupSingle()
@@ -253,16 +291,20 @@ class GroupsAndCollison():
         self.fireball_group = pygame.sprite.Group()
 
     def collision_char1_orb(self):
+        """Function to check collision between player character and orbs in the first phase"""
         return pygame.sprite.spritecollide(self.char1_group.sprite, self.orb_group, True)
 
     def collision_char2_orb(self):
+        """Function to check collision between player character and orbs in the second phase"""
         return pygame.sprite.spritecollide(self.char2_group.sprite, self.orb_group, True)
 
     def collision_char2_fireball(self):
+        """Function to check collision between player character and fireballs in the second phase"""
         return pygame.sprite.spritecollide(self.char2_group.sprite, self.fireball_group, True)
 
 
 class GameLoop():
+    """Class which combines all game elements and starts the game"""
     def __init__(self):
         pygame.init()
 
@@ -276,12 +318,12 @@ class GameLoop():
 
         self.groups = GroupsAndCollison()
 
-        self.bg_surface = pygame.image.load("graphics/backround.png").convert_alpha()
+        self.bg_surface = pygame.image.load("gfx/backround.png").convert_alpha()
         self.bg_width = self.bg_surface.get_width()
         self.scroll = 0
         self.tiles = math.ceil(self.screen_width / self.bg_width) + 1
 
-        self.bg2_surface = pygame.image.load("graphics/backround2.png").convert_alpha()
+        self.bg2_surface = pygame.image.load("gfx/backround2.png").convert_alpha()
         self.bg2_width = self.bg2_surface.get_width()
         self.scroll2 = 0
         self.tiles2 = math.ceil(self.screen_width / self.bg2_width) + 1
@@ -309,10 +351,11 @@ class GameLoop():
         self.start_time = 0
 
         self.final_time = 0
-        self.final_time_display = 0
+        self.best_time = 0
 
 
     def display_time(self, color):
+        """Function which takes track of time and displays it"""
         current_time = (pygame.time.get_ticks() - self.start_time) // 1000
         font = pygame.font.Font(None, 50)
 
@@ -328,6 +371,7 @@ class GameLoop():
         return current_time
 
     def draw_energy_bar(self, color):
+        """Function which draws the energy bar on the screen"""
         font = pygame.font.Font(None, 50)
         text_surface = font.render("Energy", False, color)
         text_rect = text_surface.get_rect(center = (640, 50))
@@ -336,10 +380,8 @@ class GameLoop():
         pygame.draw.rect(self.screen, "Yellow", pygame.Rect(400, 70, self.bar_length, 70))
         pygame.draw.rect(self.screen, color, pygame.Rect(400, 70, 500, 70), 6)
 
-    def draw_backround(self, phase):
-        pass
-
     def bar_progress(self):
+        """Function which checks the energy bar's state and changes game phases accordingly"""
         self.bar_length -= 0.2
 
         if self.bar_length <= 0:
@@ -353,22 +395,23 @@ class GameLoop():
 
                 if os.stat("best_score.txt").st_size == 0:
                     file.write(f"{self.final_time}")
-                    self.final_time_display = self.final_time
+                    self.best_time = self.final_time
                 else:
                     file.seek(0)
                     content = file.readline()
 
                     if int(content) < self.final_time:
-                        self.final_time_display = int(content)
+                        self.best_time = int(content)
                     else:
                         file.truncate(0)
                         file.write(f"{self.final_time}")
-                        self.final_time_display = self.final_time
+                        self.best_time = self.final_time
 
             self.phases["second_phase_active"] = False
             self.phases["victory"] = True
 
     def draw_victory_screen(self):
+        """Function which draws the victory screen upon successful completion of the game"""
         self.screen.fill("Black")
         victory_font = pygame.font.Font(None, 150)
         victory_text_surf = victory_font.render("Congratulations!", False, "White")
@@ -376,14 +419,15 @@ class GameLoop():
         self.screen.blit(victory_text_surf, victory_text_rect)
 
         time_font = pygame.font.Font(None, 75)
-        best_text_surf = time_font.render(f"Best time: {self.final_time_display} seconds", False, "White")
+        best_text_surf = time_font.render(f"Best time: {self.best_time} seconds", False, "White")
         best_text_rect = best_text_surf.get_rect(center = (625, 415))
-        finish_text_surf = time_font.render(f"Finish time: {self.final_time} seconds", False, "White")
-        finish_text_rect = finish_text_surf.get_rect(center = (625, 375))
-        self.screen.blit(finish_text_surf, finish_text_rect)
+        fin_text_surf = time_font.render(f"Finish time: {self.final_time} seconds", False, "White")
+        fin_text_rect = fin_text_surf.get_rect(center = (625, 375))
+        self.screen.blit(fin_text_surf, fin_text_rect)
         self.screen.blit(best_text_surf, best_text_rect)
 
     def draw_game_over(self):
+        """Function which draws the game over screen upon the energy bar depleting completely"""
         self.screen.fill("Black")
         game_over_font = pygame.font.Font(None, 150)
         over_text_surf = game_over_font.render("Game Over", False, "White")
@@ -391,11 +435,13 @@ class GameLoop():
         self.screen.blit(over_text_surf, over_text_rect)
 
         time_font = pygame.font.Font(None, 75)
-        finish_text_surf = time_font.render(f"Finish time: {self.final_time} seconds", False, "White")
-        finish_text_rect = finish_text_surf.get_rect(center = (625, 375))
-        self.screen.blit(finish_text_surf, finish_text_rect)
+        fin_text_surf = time_font.render(f"Finish time: {self.final_time} seconds", False, "White")
+        finish_text_rect = fin_text_surf.get_rect(center = (625, 375))
+        self.screen.blit(fin_text_surf, finish_text_rect)
 
     def draw_retry_button(self):
+        """Function which draws the retry button on the victory/game over screen, 
+        which restarts the game upon being clicked"""
         self.sounds["bg_music2"].stop()
         pygame.draw.rect(self.screen, "White", pygame.Rect(475, 450, 300, 80), 6)
 
@@ -417,6 +463,7 @@ class GameLoop():
         self.screen.blit(retry_text_surf, retry_text_rect)
 
     def draw_phases(self):
+        """Function which draws the screen for each phase of the game"""
         if self.phases["first_phase_active"]:
             for i in range(0, self.tiles):
                 self.screen.blit(self.bg_surface, (i * self.bg_width + self.scroll, 0))
@@ -470,7 +517,7 @@ class GameLoop():
             if self.groups.collision_char2_orb():
                 self.sounds["orb_break_sound"].play()
                 self.bar_length += 50
-            
+
             if self.groups.collision_char2_fireball():
                 self.bar_length -= 15
                 self.sounds["fireball_hit_sound"].play()
@@ -484,6 +531,7 @@ class GameLoop():
             self.draw_retry_button()
 
     def run(self):
+        """Function which starts the game loop"""
         self.sounds["bg_music2"].play(loops = -1)
 
         while True:

@@ -24,16 +24,16 @@ class CharacterOne(pygame.sprite.Sprite):
                 [get_frame(self.sheets["attack_sheet"], i, (42, 42), 4) for i in range(6)]
         }
 
-        self.frame_index = 0.0
-        self.attack_frame_index = 0.0
-
+        self.indexes = {
+            "frame_index": 0.0,
+            "attack_frame_index": 0.0,
+            "left_clicked": False
+        }
         self.coords_change = [0.0, 0.0]
-
-        self.clicked = False
 
         self.start_coords = (90, 605)
 
-        self.image = self.frames["run_frames"][int(self.frame_index)]
+        self.image = self.frames["run_frames"][int(self.indexes["frame_index"])]
         self.rect = self.image.get_rect(midbottom = (self.start_coords[0], self.start_coords[1]))
 
     def input(self) -> None:
@@ -53,11 +53,19 @@ class CharacterOne(pygame.sprite.Sprite):
             self.coords_change[0] = 0
 
         if mouse[0]:
-            self.clicked = True
+            self.indexes["left_clicked"] = True
 
 
-    def apply_gravity(self) -> None:
-        """Function which moves the player character depending on what is pressed."""
+    def apply_movement(self) -> None:
+        """
+        Function which moves the player character depending on what is pressed
+        and sets boundaries on the screen so the player character cannot leave it.
+        """
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right > 1280:
+            self.rect.right = 1280
+
         self.coords_change[1] += 1
         self.rect.y += int(self.coords_change[1])
 
@@ -67,22 +75,22 @@ class CharacterOne(pygame.sprite.Sprite):
 
     def animation(self) -> None:
         """Function which animates the character sprite depending on player input."""
-        if self.clicked:
-            self.attack_frame_index += 0.2
-            if self.attack_frame_index >= len(self.frames["attack_frames"]):
-                self.attack_frame_index = 0
-                self.clicked = False
-            self.image = self.frames["attack_frames"][int(self.attack_frame_index)]
+        if self.indexes["left_clicked"]:
+            self.indexes["attack_frame_index"] += 0.2
+            if self.indexes["attack_frame_index"] >= len(self.frames["attack_frames"]):
+                self.indexes["attack_frame_index"] = 0
+                self.indexes["left_clicked"] = False
+            self.image = self.frames["attack_frames"][int(self.indexes["attack_frame_index"])]
         elif self.rect.bottom < 605:
-            self.frame_index += 0.1
-            if self.frame_index >= len(self.frames["jump_frames"]):
-                self.frame_index = 0
-            self.image = self.frames["jump_frames"][int(self.frame_index)]
+            self.indexes["frame_index"] += 0.1
+            if self.indexes["frame_index"] >= len(self.frames["jump_frames"]):
+                self.indexes["frame_index"] = 0
+            self.image = self.frames["jump_frames"][int(self.indexes["frame_index"])]
         else:
-            self.frame_index += 0.3
-            if self.frame_index >= len(self.frames["run_frames"]):
-                self.frame_index = 0
-            self.image = self.frames["run_frames"][int(self.frame_index)]
+            self.indexes["frame_index"] += 0.3
+            if self.indexes["frame_index"] >= len(self.frames["run_frames"]):
+                self.indexes["frame_index"] = 0
+            self.image = self.frames["run_frames"][int(self.indexes["frame_index"])]
 
     def reset(self) -> None:
         """Function which returns player character at the starting position upon restart."""
@@ -91,5 +99,5 @@ class CharacterOne(pygame.sprite.Sprite):
     def update(self) -> None:
         """Function to update the player character for each frame of the game."""
         self.input()
-        self.apply_gravity()
+        self.apply_movement()
         self.animation()

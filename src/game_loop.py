@@ -98,7 +98,7 @@ class GameLoop():
             self.phases["second_phase_active"] = False
         elif self.bar_length >= 500:
             self.bar_length = 500
-            self.final_time = self.display_time("white")
+            self.final_time = self.display_time("White")
             with open("best_score.txt", "a+", encoding = "utf-8") as file:
 
                 if os.stat("best_score.txt").st_size == 0:
@@ -106,10 +106,10 @@ class GameLoop():
                     self.best_time = self.final_time
                 else:
                     file.seek(0)
-                    content = file.readline()
+                    content = int(file.readline())
 
-                    if int(content) < self.final_time:
-                        self.best_time = int(content)
+                    if content < self.final_time:
+                        self.best_time = content
                     else:
                         file.truncate(0)
                         file.write(f"{self.final_time}")

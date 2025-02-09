@@ -55,7 +55,7 @@ class CharacterTwo(pygame.sprite.Sprite):
 
     def apply_movement(self) -> None:
         """
-        Function which moves the player character depending on what was pressed
+        Function which moves the player character depending on what is pressed
         and sets boundaries on the screen so the player character cannot leave it.
         """
         if self.rect.left < 0:

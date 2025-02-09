@@ -37,8 +37,7 @@ class GameLoop():
 
         self.sounds = {"attack_sound": pygame.mixer.Sound("sounds/attack.mp3"),
                        "orb_break_sound": pygame.mixer.Sound("sounds/orb_break.mp3"),
-                       "bg_music": pygame.mixer.Sound("sounds/music_phase_1.mp3"),
-                       "bg_music2": pygame.mixer.Sound("sounds/music_phase_2.mp3"),
+                       "music": pygame.mixer.Sound("sounds/music.mp3"),
                        "transform_sound": pygame.mixer.Sound("sounds/transformation.mp3"),
                        "fireball_hit_sound": pygame.mixer.Sound("sounds/fireball_hit.mp3"),
                        "victory_sound": pygame.mixer.Sound("sounds/victory.mp3")}
@@ -151,7 +150,7 @@ class GameLoop():
     def draw_retry_button(self) -> None:
         """Function which draws the retry button on the victory/game over screen, 
         which restarts the game upon being clicked"""
-        self.sounds["bg_music2"].stop()
+        self.sounds["music"].stop()
         pygame.draw.rect(self.screen, "White", pygame.Rect(475, 450, 300, 80), 6)
 
         mouse_pos = pygame.mouse.get_pos()
@@ -163,7 +162,7 @@ class GameLoop():
                 self.groups.fireball_group.empty()
                 self.groups.char1.reset()
                 self.groups.char2.reset()
-                self.sounds["bg_music2"].play(loops = -1)
+                self.sounds["music"].play(loops = -1)
                 self.phases["first_phase_active"] = True
                 self.phases["victory"] = False
 
@@ -209,7 +208,7 @@ class GameLoop():
                 self.scroll2 = 0
 
             if self.bar_length >= 500:
-                self.sounds["bg_music2"].stop()
+                self.sounds["music"].stop()
                 self.sounds["victory_sound"].play()
 
             self.bar_progress()
@@ -242,7 +241,7 @@ class GameLoop():
 
     def run(self) -> None:
         """Function which starts the game loop and checks for events"""
-        self.sounds["bg_music2"].play(loops = -1)
+        self.sounds["music"].play(loops = -1)
 
         while True:
             for event in pygame.event.get():

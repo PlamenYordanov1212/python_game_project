@@ -58,7 +58,7 @@ class GameLoop():
         self.best_time = 0
 
 
-    def display_time(self, color) -> int:
+    def display_time(self, color: str) -> int:
         """Function which tracks the elapsed time and displays it."""
         current_time = (pygame.time.get_ticks() - self.start_time) // 1000
         font = pygame.font.Font(None, 50)
@@ -74,7 +74,7 @@ class GameLoop():
 
         return current_time
 
-    def draw_energy_bar(self, color) -> None:
+    def draw_energy_bar(self, color: str) -> None:
         """Function which draws the energy bar on the screen for each frame of the game."""
         font = pygame.font.Font(None, 50)
         text_surface = font.render("Energy", False, color)
